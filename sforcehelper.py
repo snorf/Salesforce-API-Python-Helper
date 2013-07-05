@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8
 '''
 * Copyright 2011 Ben Smith
 *
@@ -205,7 +206,37 @@ class sforcehelper:
         payload = '%s%s%s%s</soapenv:Envelope>' % (self.XML_DOM_DEF, self.XML_SOAP_ENV, self.XML_SOAP_HEAD, requestBody)
 
         self.response = self._post_to_sf_api(self.sfServerUrl, self.SF_API_REQUEST_ENDPOINT, payload, 'text/xml', 'update')
-    
+
+    #================================================================
+    #     Mass Update
+    #----------------------------------------------------------------
+    #    @param sfObject: The API Name of the object to be created
+    #    @param sfObjects: A list of dict objects, must have 'Id'
+    #                      that will be used in the update call
+    #================================================================
+    def mass_update(self, sfObject, sfObjects):
+        requestBody = '''<soapenv:Body>
+                             <urn:update>'''
+        for sfFields in sfObjects:
+            if(sfFields.has_key('Id')):
+                sfId = sfFields['Id']
+                sfFields.pop('Id',None)
+                sfFields.pop('CreatedDate',None)
+                requestBody += '''<urn:sObjects xsi:type="urn1:%s">
+                                         <urn1:Id>%s</urn1:Id>''' % (sfObject, sfId)
+
+                for sfFieldName, sfFieldValue in sfFields.iteritems():
+                    requestBody += '<urn1:%s>%s</urn1:%s>' % (sfFieldName, sfFieldValue, sfFieldName)
+                requestBody += '''</urn:sObjects>'''
+            else:
+                print sfFields,'is missing Id'
+        requestBody += '''</urn:update>
+                        </soapenv:Body>'''
+
+        payload = '%s%s%s%s</soapenv:Envelope>' % (self.XML_DOM_DEF, self.XML_SOAP_ENV, self.XML_SOAP_HEAD, requestBody)
+
+        self.response = self._post_to_sf_api(self.sfServerUrl, self.SF_API_REQUEST_ENDPOINT, payload, 'text/xml', 'update')
+
     #================================================================
     #    Delete
     #----------------------------------------------------------------

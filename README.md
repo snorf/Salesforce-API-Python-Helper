@@ -13,3 +13,4 @@ Contributors
 ------------
 
 * TheRealBenSmith (Ben Smith) https://github.com/TheRealBenSmith
+* Snorf (Johan Karlsteen) https://github.com/snorf/
